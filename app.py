@@ -4,7 +4,7 @@ import os
 
 st.set_page_config(page_title="AI Subtitle Generator", page_icon="🎬")
 st.title("🎬 AI Subtitle Generator")
-st.write("Subtitle sekarang lebih pendek dan lebih pas!")
+st.write("Versi Fix: Teks lebih pendek & sinkron.")
 
 try:
     aai.settings.api_key = st.secrets["AAI_KEY"]
@@ -14,17 +14,17 @@ except:
 uploaded_file = st.file_uploader("Upload Video", type=["mp4", "mov"])
 
 if st.button("Mulai Proses") and uploaded_file:
-    st.info("Lagi diproses... AI lagi motong-motong kalimat biar gak kepanjangan.")
+    st.info("Lagi diproses... AI lagi dengerin & motong kalimat.")
     
     with open("temp_video.mp4", "wb") as f:
         f.write(uploaded_file.getbuffer())
     
     try:
-        # SETTING BIAR TEKS PENDEK & SINKRON
+        # PERBAIKAN: Pakai 'punctuate' dan 'format_text'
         config = aai.TranscriptionConfig(
             speech_models=["universal-3-pro", "universal-2"], 
             language_code="id",
-            punctuation=True,
+            punctuate=True,
             format_text=True
         )
         
@@ -34,15 +34,14 @@ if st.button("Mulai Proses") and uploaded_file:
         if transcript.status == aai.TranscriptStatus.error:
             st.error(f"Error: {transcript.error}")
         else:
-            # chars_per_caption=40 biar teksnya pendek (sekitar 1 baris)
-            # Ini yang bikin teks nggak numpuk kepanjangan
-            srt_data = transcript.export_subtitles_srt(chars_per_caption=40)
+            # Kita kecilin lagi chars_per_caption ke 35 biar makin pendek
+            srt_data = transcript.export_subtitles_srt(chars_per_caption=35)
             
             st.success("✅ Selesai!")
             st.download_button(
                 label="⬇️ DOWNLOAD .SRT",
                 data=srt_data,
-                file_name="subtitle_pendek.srt",
+                file_name="subtitle_fix.srt",
                 mime="text/plain"
             )
             
